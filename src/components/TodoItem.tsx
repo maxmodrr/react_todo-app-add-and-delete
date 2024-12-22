@@ -6,20 +6,22 @@ import { USER_ID } from '../api/todos';
 
 interface Props {
   todo: Todo;
-  onUpdate: (v: Todo) => void;
-  onDelete: (n: number) => void;
+  onUpdate?: (v: Todo) => void;
+  onDelete?: (n: number) => void;
   loader: boolean;
-  massLoader: boolean;
+  massLoader?: boolean;
   tempTodo?: Todo | null;
+  onErrorMessage?: (v: string) => void;
 }
 
 export const TodoItem: React.FC<Props> = ({
   todo: { id, title, completed },
-  onUpdate,
-  onDelete,
+  onUpdate = () => {},
+  onDelete = () => {},
   loader,
-  massLoader,
+  massLoader = false,
   tempTodo = null,
+  onErrorMessage = () => {},
 }) => {
   const [activeTodoId, setActiveTodoId] = useState<number | null>(null);
   const handleChangeCheckbox = async () => {
@@ -33,9 +35,15 @@ export const TodoItem: React.FC<Props> = ({
     setActiveTodoId(null);
   };
 
-  const handleDelete = () => {
-    setActiveTodoId(id);
-    onDelete(id);
+  const handleDelete = async () => {
+    try {
+      setActiveTodoId(id);
+
+      await onDelete(id);
+    } catch {
+      setActiveTodoId(null);
+      onErrorMessage('Unable to delete a todo');
+    }
   };
 
   return (

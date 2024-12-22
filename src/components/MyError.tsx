@@ -5,7 +5,7 @@ interface Props {
   onErrorMessage: (v: string) => void;
 }
 
-export const Error: React.FC<Props> = ({ errorMessage, onErrorMessage }) => {
+export const MyError: React.FC<Props> = ({ errorMessage, onErrorMessage }) => {
   const errorDiv = useRef<HTMLDivElement | null>(null);
   const timerId = useRef(0);
 
@@ -16,7 +16,7 @@ export const Error: React.FC<Props> = ({ errorMessage, onErrorMessage }) => {
       timerId.current = window.setTimeout(() => {
         errorDiv.current?.classList.add('hidden');
         onErrorMessage('');
-      }, 2000);
+      }, 3000);
     }
   }, [errorMessage, onErrorMessage]);
 
@@ -29,8 +29,7 @@ export const Error: React.FC<Props> = ({ errorMessage, onErrorMessage }) => {
     <div
       ref={errorDiv}
       data-cy="ErrorNotification"
-      className="notification
-        is-danger is-light has-text-weight-normal hidden"
+      className="notification is-danger is-light has-text-weight-normal hidden"
     >
       <button
         data-cy="HideErrorButton"

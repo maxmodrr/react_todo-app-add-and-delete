@@ -9,6 +9,7 @@ interface Props {
   loader: boolean;
   massLoader: boolean;
   tempTodo?: Todo | null;
+  onErrorMessage: (v: string) => void;
 }
 
 export const TodoList: React.FC<Props> = ({
@@ -18,30 +19,27 @@ export const TodoList: React.FC<Props> = ({
   loader,
   massLoader,
   tempTodo = null,
+  onErrorMessage,
 }) => {
   return (
     <section className="todoapp__main" data-cy="TodoList">
-      {todos.map(todo => (
-        <TodoItem
-          key={todo.id}
-          todo={todo}
-          onUpdate={onUpdate}
-          onDelete={onDelete}
-          loader={loader}
-          massLoader={massLoader}
-        />
-      ))}
+      <div>
+        {todos.map(todo => (
+          <TodoItem
+            key={todo.id}
+            todo={todo}
+            onUpdate={onUpdate}
+            onDelete={onDelete}
+            loader={loader}
+            massLoader={massLoader}
+            onErrorMessage={onErrorMessage}
+          />
+        ))}
 
-      {tempTodo && (
-        <TodoItem
-          todo={tempTodo}
-          onUpdate={onUpdate}
-          onDelete={onDelete}
-          loader={loader}
-          massLoader={massLoader}
-          tempTodo={tempTodo}
-        />
-      )}
+        {tempTodo && (
+          <TodoItem todo={tempTodo} loader={loader} tempTodo={tempTodo} />
+        )}
+      </div>
     </section>
   );
 };

@@ -9,7 +9,7 @@ import { TodoList } from './components/TodoList';
 import { FILTER_BY } from './constants/constants';
 import { Footer } from './components/Footer';
 import { Header } from './components/Header';
-import { Error } from './components/Error';
+import { MyError } from './components/MyError';
 
 function filterTodos(todos: Todo[], filterBy: string) {
   const copy = [...todos];
@@ -75,36 +75,46 @@ export const App: React.FC = () => {
   const handleDeleteTodo = async (id: number) => {
     setLoader(true);
 
-    await pause();
-    await deleteTodo(id)
-      .catch(() => {
-        setErrorMessage('Unable to delete todo');
-      })
-      .finally(() => setLoader(false));
-
-    setTodos(prev => {
-      const copy = [...prev];
-      const index = copy.findIndex(e => e.id === id);
-
-      copy.splice(index, 1);
-
-      return copy;
-    });
+    try {
+      await pause();
+      await deleteTodo(id);
+      setTodos(prev => prev.filter(e => e.id !== id));
+    } finally {
+      setLoader(false);
+    }
   };
 
   const clearCompleted = async () => {
     setMassLoader(true);
     const completedTodos = getCompletedTodos(todos);
+    const todosToDelete: number[] = [];
+    let isError = false;
 
     try {
       await pause();
-      await Promise.all(completedTodos.map(e => deleteTodo(e.id)));
-      setTodos(prev => {
-        return prev.filter(e => !e.completed);
+      const results = await Promise.allSettled(
+        completedTodos.map(e => deleteTodo(e.id)),
+      );
+
+      results.forEach((res, i) => {
+        if (res.status === 'fulfilled') {
+          todosToDelete.push(completedTodos[i].id);
+        } else {
+          isError = true;
+        }
       });
+
+      if (isError) {
+        throw new Error('Unable to delete a todo');
+      }
+
+      // const isSuccess = results
+      //   .filter(result => result.status === 'fulfilled')
+      //   .map((_, index) => completedTodos[index].id);
     } catch {
-      setErrorMessage('Unable to delete todos');
+      setErrorMessage('Unable to delete a todo');
     } finally {
+      setTodos(prev => prev.filter(todo => !todosToDelete.includes(todo.id)));
       setMassLoader(false);
     }
   };
@@ -132,6 +142,7 @@ export const App: React.FC = () => {
             loader={loader}
             massLoader={massLoader}
             tempTodo={tempTodo}
+            onErrorMessage={setErrorMessage}
           />
         )}
 
@@ -149,7 +160,7 @@ export const App: React.FC = () => {
 
       {/* DON'T use conditional rendering to hide the notification */}
       {/* Add the 'hidden' class to hide the message smoothly */}
-      <Error errorMessage={errorMessage} onErrorMessage={setErrorMessage} />
+      <MyError errorMessage={errorMessage} onErrorMessage={setErrorMessage} />
     </div>
   );
 };

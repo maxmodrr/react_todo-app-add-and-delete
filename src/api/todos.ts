@@ -8,7 +8,7 @@ export const getTodos = () => {
 };
 
 export const deleteTodo = (id: number) => {
-  return client.delete(`/todos/${id}?userId=${USER_ID}`);
+  return client.delete(`/todos/${id}`);
 };
 
 export const addTodo = ({ title, userId, completed }: Omit<Todo, 'id'>) => {
@@ -18,13 +18,13 @@ export const addTodo = ({ title, userId, completed }: Omit<Todo, 'id'>) => {
     completed,
   };
 
-  return client.post<Todo>(`/todos?userId=${USER_ID}`, data);
+  return client.post<Todo>(`/todos`, data);
 };
 
 export const updateTodo = ({
   id,
   completed,
 }: Omit<Todo, 'userId' | 'title'>) => {
-  return client.patch<Todo>(`/todos/${id}?userId=${USER_ID}`, { completed });
+  return client.patch<Todo>(`/todos/${id}`, { completed });
 };
 // Add more methods here

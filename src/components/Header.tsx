@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import React, { FormEvent, useRef, useState } from 'react';
+import React, { FormEvent, useEffect, useRef, useState } from 'react';
 import { addTodo, updateTodo, USER_ID } from '../api/todos';
 import { Todo } from '../types/Todo';
 import { getCompletedTodos, pause } from '../utils/methods';
@@ -26,6 +26,13 @@ export const Header: React.FC<Props> = ({
   const [title, setTitle] = useState('');
   const [disabled, setDisabled] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  });
+
   const changeAllCompleted = async () => {
     const shouldCompleteAll =
       getCompletedTodos(todos).length === 0 || sizeLeft > 0;
@@ -50,7 +57,7 @@ export const Header: React.FC<Props> = ({
 
       onTodos(updatedTodos);
     } catch {
-      onErrorMessage('Unable to update todo');
+      onErrorMessage('Unable to update a todo');
     } finally {
       onMassLoader(false);
     }
@@ -61,7 +68,7 @@ export const Header: React.FC<Props> = ({
 
     if (title.trim()) {
       const newTodo = {
-        title,
+        title: title.trim(),
         userId: USER_ID,
         completed: false,
       };
@@ -81,7 +88,7 @@ export const Header: React.FC<Props> = ({
 
         setTitle('');
       } catch {
-        onErrorMessage('Unable to add todo');
+        onErrorMessage('Unable to add a todo');
       } finally {
         onTempTodo(null);
         onLoader(false);
@@ -117,8 +124,8 @@ export const Header: React.FC<Props> = ({
           type="text"
           className="todoapp__new-todo"
           placeholder="What needs to be done?"
-          autoFocus
           disabled={disabled}
+          autoFocus
           value={title}
           ref={inputRef}
           onChange={e => setTitle(e.target.value)}
